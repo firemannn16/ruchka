@@ -119,10 +119,18 @@
             flex-shrink: 0;
             transition: background 0.2s;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
 
         .add-column-btn:active {
             background: #45a049;
+        }
+
+        .add-column-btn:focus {
+            outline: none;
         }
 
         .remove-column-btn {
@@ -137,10 +145,18 @@
             flex-shrink: 0;
             transition: background 0.2s;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
 
         .remove-column-btn:active {
             background: #da190b;
+        }
+
+        .remove-column-btn:focus {
+            outline: none;
         }
 
         .separator {
@@ -361,10 +377,18 @@
             cursor: pointer;
             flex-shrink: 0;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
 
         .modal-add-btn:active {
             background: #45a049;
+        }
+
+        .modal-add-btn:focus {
+            outline: none;
         }
 
         .modal-section {
@@ -469,7 +493,7 @@
                 <div class="column-group" id="russianColumns">
                     <div class="input-row">
                         <input type="text" placeholder="Введите слово" data-lang="ru">
-                        <button class="add-column-btn" onclick="addColumn('ru')">+</button>
+                        <button class="add-column-btn" onclick="addColumn('ru', event)">+</button>
                     </div>
                 </div>
             </div>
@@ -481,7 +505,7 @@
                 <div class="column-group" id="arabicColumns">
                     <div class="input-row arabic">
                         <input type="text" placeholder="اكتب الكلمة" data-lang="ar">
-                        <button class="add-column-btn" onclick="addColumn('ar')">+</button>
+                        <button class="add-column-btn" onclick="addColumn('ar', event)">+</button>
                     </div>
                 </div>
             </div>
@@ -523,33 +547,58 @@
         let currentEditIndex = null;
 
         // Добавить колонку
-        function addColumn(lang) {
+        function addColumn(lang, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
             const container = document.getElementById(lang === 'ru' ? 'russianColumns' : 'arabicColumns');
             const newRow = document.createElement('div');
             newRow.className = 'input-row' + (lang === 'ar' ? ' arabic' : '');
             
             newRow.innerHTML = `
                 <input type="text" placeholder="${lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة'}" data-lang="${lang}">
-                <button class="remove-column-btn" onclick="removeColumn(this)">✕</button>
+                <button class="remove-column-btn" onclick="removeColumn(this, event)">✕</button>
             `;
             
             container.appendChild(newRow);
             
-            // Фокус на новом поле
+            // Фокус на новом поле - увеличена задержка для iOS
             const newInput = newRow.querySelector('input');
-            setTimeout(() => newInput.focus(), 100);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    newInput.focus();
+                });
+            });
             
             checkForm();
         }
 
         // Удалить колонку
-        function removeColumn(btn) {
+        function removeColumn(btn, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
             const row = btn.parentElement;
             const container = row.parentElement;
             
             // Не даем удалить последнюю колонку
             if (container.children.length > 1) {
+                // Запоминаем предыдущее поле для фокуса
+                const prevRow = row.previousElementSibling;
                 row.remove();
+                
+                // Фокусируемся на предыдущем поле
+                if (prevRow) {
+                    const prevInput = prevRow.querySelector('input');
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            prevInput.focus();
+                        });
+                    });
+                }
+                
                 checkForm();
             }
         }
@@ -699,7 +748,7 @@
             const ruAddBtn = document.createElement('button');
             ruAddBtn.className = 'modal-add-btn';
             ruAddBtn.textContent = '+';
-            ruAddBtn.onclick = () => addModalField('ru');
+            ruAddBtn.onclick = (e) => addModalField('ru', e);
             ruAddBtn.style.width = '100%';
             ruAddBtn.style.marginTop = '8px';
             ruGroup.appendChild(ruAddBtn);
@@ -735,7 +784,7 @@
             const arAddBtn = document.createElement('button');
             arAddBtn.className = 'modal-add-btn';
             arAddBtn.textContent = '+';
-            arAddBtn.onclick = () => addModalField('ar');
+            arAddBtn.onclick = (e) => addModalField('ar', e);
             arAddBtn.style.width = '100%';
             arAddBtn.style.marginTop = '8px';
             arGroup.appendChild(arAddBtn);
@@ -747,7 +796,11 @@
         }
 
         // Добавить поле в модальном окне
-        function addModalField(lang) {
+        function addModalField(lang, event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
             const section = document.getElementById(lang === 'ru' ? 'editRuSection' : 'editArSection');
             const addBtn = section.querySelector('.modal-add-btn');
             
@@ -769,8 +822,12 @@
             row.appendChild(input);
             section.insertBefore(row, addBtn);
             
-            // Фокус на новом поле
-            setTimeout(() => input.focus(), 100);
+            // Фокус на новом поле - увеличена задержка для iOS
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    input.focus();
+                });
+            });
         }
 
         // Сохранить редактирование
