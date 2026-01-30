@@ -85,10 +85,12 @@
 
         .input-row input {
             flex: 1;
-            padding: 14px;
+            padding: 16px 14px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 17px;
+            line-height: 1.4;
+            min-height: 52px;
             transition: border-color 0.2s;
             -webkit-appearance: none;
         }
@@ -325,13 +327,59 @@
 
         .modal-content input {
             width: 100%;
-            padding: 14px;
+            padding: 16px 14px;
             margin-top: 8px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 17px;
+            line-height: 1.4;
+            min-height: 52px;
             box-sizing: border-box;
             -webkit-appearance: none;
+        }
+
+        .modal-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .modal-input-row input {
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .modal-add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 52px;
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .modal-add-btn:active {
+            background: #45a049;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .modal-section-header strong {
+            color: #666;
         }
 
         .modal-content input:focus {
@@ -628,21 +676,49 @@
             
             // Русские колонки
             const ruGroup = document.createElement('div');
-            ruGroup.style.marginBottom = '20px';
-            ruGroup.innerHTML = '<strong style="display: block; margin-bottom: 10px; color: #666;">🇷🇺 Русский:</strong>';
+            ruGroup.className = 'modal-section';
+            ruGroup.id = 'editRuSection';
+            
+            const ruHeader = document.createElement('div');
+            ruHeader.className = 'modal-section-header';
+            ruHeader.innerHTML = '<strong>🇷🇺 Русский:</strong>';
+            ruGroup.appendChild(ruHeader);
+            
             ruParts.forEach((val, i) => {
+                const row = document.createElement('div');
+                row.className = 'modal-input-row';
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = val;
                 input.dataset.lang = 'ru';
-                ruGroup.appendChild(input);
+                row.appendChild(input);
+                ruGroup.appendChild(row);
             });
+            
+            // Кнопка добавить русское поле
+            const ruAddBtn = document.createElement('button');
+            ruAddBtn.className = 'modal-add-btn';
+            ruAddBtn.textContent = '+';
+            ruAddBtn.onclick = () => addModalField('ru');
+            ruAddBtn.style.width = '100%';
+            ruAddBtn.style.marginTop = '8px';
+            ruGroup.appendChild(ruAddBtn);
+            
             container.appendChild(ruGroup);
             
             // Арабские колонки
             const arGroup = document.createElement('div');
-            arGroup.innerHTML = '<strong style="display: block; margin-bottom: 10px; color: #666;">🇸🇦 العربية:</strong>';
+            arGroup.className = 'modal-section';
+            arGroup.id = 'editArSection';
+            
+            const arHeader = document.createElement('div');
+            arHeader.className = 'modal-section-header';
+            arHeader.innerHTML = '<strong>🇸🇦 العربية:</strong>';
+            arGroup.appendChild(arHeader);
+            
             arParts.forEach((val, i) => {
+                const row = document.createElement('div');
+                row.className = 'modal-input-row';
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = val;
@@ -651,19 +727,59 @@
                 input.style.fontFamily = "'Traditional Arabic', 'Arabic Typesetting', Arial";
                 input.style.fontSize = '20px';
                 input.dataset.lang = 'ar';
-                arGroup.appendChild(input);
+                row.appendChild(input);
+                arGroup.appendChild(row);
             });
+            
+            // Кнопка добавить арабское поле
+            const arAddBtn = document.createElement('button');
+            arAddBtn.className = 'modal-add-btn';
+            arAddBtn.textContent = '+';
+            arAddBtn.onclick = () => addModalField('ar');
+            arAddBtn.style.width = '100%';
+            arAddBtn.style.marginTop = '8px';
+            arGroup.appendChild(arAddBtn);
+            
             container.appendChild(arGroup);
             
             // Показываем модальное окно
             document.getElementById('editModal').classList.add('show');
         }
 
+        // Добавить поле в модальном окне
+        function addModalField(lang) {
+            const section = document.getElementById(lang === 'ru' ? 'editRuSection' : 'editArSection');
+            const addBtn = section.querySelector('.modal-add-btn');
+            
+            const row = document.createElement('div');
+            row.className = 'modal-input-row';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة';
+            input.dataset.lang = lang;
+            
+            if (lang === 'ar') {
+                input.style.direction = 'rtl';
+                input.style.textAlign = 'right';
+                input.style.fontFamily = "'Traditional Arabic', 'Arabic Typesetting', Arial";
+                input.style.fontSize = '20px';
+            }
+            
+            row.appendChild(input);
+            section.insertBefore(row, addBtn);
+            
+            // Фокус на новом поле
+            setTimeout(() => input.focus(), 100);
+        }
+
         // Сохранить редактирование
         function saveEdit() {
-            const container = document.getElementById('editColumnsContainer');
-            const ruInputs = Array.from(container.querySelectorAll('input[data-lang="ru"]'));
-            const arInputs = Array.from(container.querySelectorAll('input[data-lang="ar"]'));
+            const ruSection = document.getElementById('editRuSection');
+            const arSection = document.getElementById('editArSection');
+            
+            const ruInputs = Array.from(ruSection.querySelectorAll('input[data-lang="ru"]'));
+            const arInputs = Array.from(arSection.querySelectorAll('input[data-lang="ar"]'));
             
             const ruValues = ruInputs.map(i => i.value.trim()).filter(v => v !== '');
             const arValues = arInputs.map(i => i.value.trim()).filter(v => v !== '');
