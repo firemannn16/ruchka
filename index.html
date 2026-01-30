@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Записать слова</title>
     <style>
         * {
@@ -480,7 +478,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>📝 Записать слова</h1>
+        <h1>📝 Запись слов</h1>
         <div class="stats">
             Всего слов: <span id="totalCount">0</span>
         </div>
@@ -493,7 +491,7 @@
                 <div class="column-group" id="russianColumns">
                     <div class="input-row">
                         <input type="text" placeholder="Введите слово" data-lang="ru">
-                        <button class="add-column-btn" onclick="addColumn('ru', event)">+</button>
+                        <button class="add-column-btn" data-lang="ru">+</button>
                     </div>
                 </div>
             </div>
@@ -505,7 +503,7 @@
                 <div class="column-group" id="arabicColumns">
                     <div class="input-row arabic">
                         <input type="text" placeholder="اكتب الكلمة" data-lang="ar">
-                        <button class="add-column-btn" onclick="addColumn('ar', event)">+</button>
+                        <button class="add-column-btn" data-lang="ar">+</button>
                     </div>
                 </div>
             </div>
@@ -547,27 +545,31 @@
         let currentEditIndex = null;
 
         // Добавить колонку
-        function addColumn(lang, event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
+        function addColumn(lang) {
             const container = document.getElementById(lang === 'ru' ? 'russianColumns' : 'arabicColumns');
             const newRow = document.createElement('div');
             newRow.className = 'input-row' + (lang === 'ar' ? ' arabic' : '');
             
             newRow.innerHTML = `
                 <input type="text" placeholder="${lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة'}" data-lang="${lang}">
-                <button class="remove-column-btn" onclick="removeColumn(this, event)">✕</button>
+                <button class="remove-column-btn">✕</button>
             `;
             
             container.appendChild(newRow);
             
-            // Фокус на новом поле - увеличена задержка для iOS
+            // Устанавливаем обработчик для новой кнопки удаления
+            const removeBtn = newRow.querySelector('.remove-column-btn');
+            setupButtonHandler(removeBtn, () => removeColumn(removeBtn));
+            
+            // Фокус на новом поле
             const newInput = newRow.querySelector('input');
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     newInput.focus();
+                    // Курсор в конец на iOS
+                    if (newInput.setSelectionRange) {
+                        newInput.setSelectionRange(newInput.value.length, newInput.value.length);
+                    }
                 });
             });
             
@@ -575,11 +577,7 @@
         }
 
         // Удалить колонку
-        function removeColumn(btn, event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
+        function removeColumn(btn) {
             const row = btn.parentElement;
             const container = row.parentElement;
             
@@ -595,6 +593,10 @@
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             prevInput.focus();
+                            // Курсор в конец
+                            if (prevInput.setSelectionRange) {
+                                prevInput.setSelectionRange(prevInput.value.length, prevInput.value.length);
+                            }
                         });
                     });
                 }
@@ -748,10 +750,11 @@
             const ruAddBtn = document.createElement('button');
             ruAddBtn.className = 'modal-add-btn';
             ruAddBtn.textContent = '+';
-            ruAddBtn.onclick = (e) => addModalField('ru', e);
+            ruAddBtn.dataset.lang = 'ru';
             ruAddBtn.style.width = '100%';
             ruAddBtn.style.marginTop = '8px';
             ruGroup.appendChild(ruAddBtn);
+            setupButtonHandler(ruAddBtn, () => addModalField('ru'));
             
             container.appendChild(ruGroup);
             
@@ -784,10 +787,11 @@
             const arAddBtn = document.createElement('button');
             arAddBtn.className = 'modal-add-btn';
             arAddBtn.textContent = '+';
-            arAddBtn.onclick = (e) => addModalField('ar', e);
+            arAddBtn.dataset.lang = 'ar';
             arAddBtn.style.width = '100%';
             arAddBtn.style.marginTop = '8px';
             arGroup.appendChild(arAddBtn);
+            setupButtonHandler(arAddBtn, () => addModalField('ar'));
             
             container.appendChild(arGroup);
             
@@ -796,11 +800,7 @@
         }
 
         // Добавить поле в модальном окне
-        function addModalField(lang, event) {
-            if (event) {
-                event.preventDefault();
-            }
-            
+        function addModalField(lang) {
             const section = document.getElementById(lang === 'ru' ? 'editRuSection' : 'editArSection');
             const addBtn = section.querySelector('.modal-add-btn');
             
@@ -822,10 +822,14 @@
             row.appendChild(input);
             section.insertBefore(row, addBtn);
             
-            // Фокус на новом поле - увеличена задержка для iOS
+            // Фокус на новом поле
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     input.focus();
+                    // Курсор в конец
+                    if (input.setSelectionRange) {
+                        input.setSelectionRange(input.value.length, input.value.length);
+                    }
                 });
             });
         }
@@ -929,9 +933,35 @@
             }
         });
 
+        // Установка обработчика для кнопок (touchstart для iOS)
+        function setupButtonHandler(button, callback) {
+            // Для iOS используем touchstart чтобы клавиатура не закрывалась
+            button.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                callback();
+            }, { passive: false });
+            
+            // Для десктопа оставляем click
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                callback();
+            });
+        }
+
+        // Инициализация обработчиков для начальных кнопок
+        function initButtonHandlers() {
+            // Кнопки добавления колонок
+            document.querySelectorAll('.add-column-btn').forEach(btn => {
+                const lang = btn.dataset.lang;
+                setupButtonHandler(btn, () => addColumn(lang));
+            });
+        }
+
         // Инициализация
         renderWords();
         checkForm();
+        initButtonHandlers();
     </script>
 </body>
 </html>
