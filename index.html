@@ -2,7 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Записать слова</title>
     <style>
         * {
@@ -15,8 +17,11 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: #f5f5f5;
             padding: 15px;
+            padding-bottom: 30px;
             max-width: 600px;
             margin: 0 auto;
+            -webkit-text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
         }
 
         .header {
@@ -49,16 +54,27 @@
 
         .columns-container {
             display: flex;
-            gap: 10px;
-            align-items: flex-start;
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 15px;
         }
 
+        .column-section {
+            width: 100%;
+        }
+
+        .column-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            display: block;
+        }
+
         .column-group {
-            flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .input-row {
@@ -69,11 +85,12 @@
 
         .input-row input {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 17px;
             transition: border-color 0.2s;
+            -webkit-appearance: none;
         }
 
         .input-row input:focus {
@@ -85,22 +102,24 @@
             direction: rtl;
             text-align: right;
             font-family: 'Traditional Arabic', 'Arabic Typesetting', Arial;
+            font-size: 20px;
         }
 
         .add-column-btn {
             background: #4CAF50;
             color: white;
             border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            font-size: 18px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            font-size: 20px;
             cursor: pointer;
             flex-shrink: 0;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .add-column-btn:hover {
+        .add-column-btn:active {
             background: #45a049;
         }
 
@@ -108,40 +127,42 @@
             background: #f44336;
             color: white;
             border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            font-size: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            font-size: 18px;
             cursor: pointer;
             flex-shrink: 0;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .remove-column-btn:hover {
+        .remove-column-btn:active {
             background: #da190b;
         }
 
         .separator {
-            align-self: center;
-            font-size: 20px;
-            color: #666;
-            margin: 0 5px;
+            text-align: center;
+            font-size: 18px;
+            color: #999;
+            margin: 5px 0;
         }
 
         .add-word-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 12px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .add-word-btn:hover:not(:disabled) {
+        .add-word-btn:active:not(:disabled) {
             background: #45a049;
         }
 
@@ -202,18 +223,19 @@
         .edit-btn, .delete-btn {
             background: transparent;
             border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 18px;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .edit-btn {
             color: #2196F3;
         }
 
-        .edit-btn:hover {
+        .edit-btn:active {
             background: #e3f2fd;
         }
 
@@ -221,7 +243,7 @@
             color: #f44336;
         }
 
-        .delete-btn:hover {
+        .delete-btn:active {
             background: #ffebee;
         }
 
@@ -232,13 +254,14 @@
 
         .copy-all-btn, .clear-all-btn {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .copy-all-btn {
@@ -246,7 +269,7 @@
             color: white;
         }
 
-        .copy-all-btn:hover {
+        .copy-all-btn:active {
             background: #0b7dda;
         }
 
@@ -255,7 +278,7 @@
             color: white;
         }
 
-        .clear-all-btn:hover {
+        .clear-all-btn:active {
             background: #da190b;
         }
 
@@ -286,11 +309,12 @@
         .modal-content {
             background: white;
             padding: 25px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 90%;
             max-width: 500px;
             max-height: 80vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .modal-content h3 {
@@ -299,20 +323,37 @@
             color: #333;
         }
 
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 17px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
         .modal-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 20px;
         }
 
         .modal-buttons button {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .save-btn {
@@ -320,9 +361,17 @@
             color: white;
         }
 
+        .save-btn:active {
+            background: #45a049;
+        }
+
         .cancel-btn {
             background: #ccc;
             color: #333;
+        }
+
+        .cancel-btn:active {
+            background: #b8b8b8;
         }
 
         /* Уведомление */
@@ -367,25 +416,31 @@
 
     <div class="input-section">
         <div class="columns-container">
-            <div class="column-group" id="russianColumns">
-                <div class="input-row">
-                    <input type="text" placeholder="Русский" data-lang="ru">
-                    <button class="add-column-btn" onclick="addColumn('ru')">+</button>
+            <div class="column-section">
+                <span class="column-label">🇷🇺 Русский:</span>
+                <div class="column-group" id="russianColumns">
+                    <div class="input-row">
+                        <input type="text" placeholder="Введите слово" data-lang="ru">
+                        <button class="add-column-btn" onclick="addColumn('ru')">+</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="separator">-</div>
+            <div class="separator">─────</div>
 
-            <div class="column-group" id="arabicColumns">
-                <div class="input-row arabic">
-                    <input type="text" placeholder="عربي" data-lang="ar">
-                    <button class="add-column-btn" onclick="addColumn('ar')">+</button>
+            <div class="column-section">
+                <span class="column-label">🇸🇦 العربية:</span>
+                <div class="column-group" id="arabicColumns">
+                    <div class="input-row arabic">
+                        <input type="text" placeholder="اكتب الكلمة" data-lang="ar">
+                        <button class="add-column-btn" onclick="addColumn('ar')">+</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <button class="add-word-btn" id="addWordBtn" onclick="addWord()">
-            Добавить слово
+            ➕ Добавить слово
         </button>
     </div>
 
@@ -426,11 +481,16 @@
             newRow.className = 'input-row' + (lang === 'ar' ? ' arabic' : '');
             
             newRow.innerHTML = `
-                <input type="text" placeholder="${lang === 'ru' ? 'Русский' : 'عربي'}" data-lang="${lang}">
+                <input type="text" placeholder="${lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة'}" data-lang="${lang}">
                 <button class="remove-column-btn" onclick="removeColumn(this)">✕</button>
             `;
             
             container.appendChild(newRow);
+            
+            // Фокус на новом поле
+            const newInput = newRow.querySelector('input');
+            setTimeout(() => newInput.focus(), 100);
+            
             checkForm();
         }
 
@@ -568,18 +628,12 @@
             
             // Русские колонки
             const ruGroup = document.createElement('div');
-            ruGroup.style.marginBottom = '15px';
-            ruGroup.innerHTML = '<strong>Русский:</strong>';
+            ruGroup.style.marginBottom = '20px';
+            ruGroup.innerHTML = '<strong style="display: block; margin-bottom: 10px; color: #666;">🇷🇺 Русский:</strong>';
             ruParts.forEach((val, i) => {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = val;
-                input.style.width = '100%';
-                input.style.padding = '10px';
-                input.style.marginTop = '8px';
-                input.style.border = '2px solid #e0e0e0';
-                input.style.borderRadius = '8px';
-                input.style.fontSize = '16px';
                 input.dataset.lang = 'ru';
                 ruGroup.appendChild(input);
             });
@@ -587,19 +641,15 @@
             
             // Арабские колонки
             const arGroup = document.createElement('div');
-            arGroup.innerHTML = '<strong>Арабский:</strong>';
+            arGroup.innerHTML = '<strong style="display: block; margin-bottom: 10px; color: #666;">🇸🇦 العربية:</strong>';
             arParts.forEach((val, i) => {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.value = val;
-                input.style.width = '100%';
-                input.style.padding = '10px';
-                input.style.marginTop = '8px';
-                input.style.border = '2px solid #e0e0e0';
-                input.style.borderRadius = '8px';
-                input.style.fontSize = '16px';
                 input.style.direction = 'rtl';
                 input.style.textAlign = 'right';
+                input.style.fontFamily = "'Traditional Arabic', 'Arabic Typesetting', Arial";
+                input.style.fontSize = '20px';
                 input.dataset.lang = 'ar';
                 arGroup.appendChild(input);
             });
