@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Записать слова</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .stats {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Секция ввода */
+        .input-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .columns-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .column-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .input-row.arabic input {
+            direction: rtl;
+            text-align: right;
+            font-family: 'Traditional Arabic', 'Arabic Typesetting', Arial;
+        }
+
+        .add-column-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .add-column-btn:hover {
+            background: #45a049;
+        }
+
+        .remove-column-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .remove-column-btn:hover {
+            background: #da190b;
+        }
+
+        .separator {
+            align-self: center;
+            font-size: 20px;
+            color: #666;
+            margin: 0 5px;
+        }
+
+        .add-word-btn {
+            width: 100%;
+            padding: 14px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-word-btn:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .add-word-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Список слов */
+        .words-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .words-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .words-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .word-item {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .word-item:hover {
+            background: #f9f9f9;
+        }
+
+        .word-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            word-break: break-word;
+            cursor: pointer;
+        }
+
+        .word-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .edit-btn {
+            color: #2196F3;
+        }
+
+        .edit-btn:hover {
+            background: #e3f2fd;
+        }
+
+        .delete-btn {
+            color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background: #ffebee;
+        }
+
+        .actions-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .copy-all-btn, .clear-all-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-all-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .copy-all-btn:hover {
+            background: #0b7dda;
+        }
+
+        .clear-all-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .clear-all-btn:hover {
+            background: #da190b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        /* Модальное окно для редактирования */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #ccc;
+            color: #333;
+        }
+
+        /* Уведомление */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 2000;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📝 Записать слова</h1>
+        <div class="stats">
+            Всего слов: <span id="totalCount">0</span>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <div class="columns-container">
+            <div class="column-group" id="russianColumns">
+                <div class="input-row">
+                    <input type="text" placeholder="Русский" data-lang="ru">
+                    <button class="add-column-btn" onclick="addColumn('ru')">+</button>
+                </div>
+            </div>
+
+            <div class="separator">-</div>
+
+            <div class="column-group" id="arabicColumns">
+                <div class="input-row arabic">
+                    <input type="text" placeholder="عربي" data-lang="ar">
+                    <button class="add-column-btn" onclick="addColumn('ar')">+</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="add-word-btn" id="addWordBtn" onclick="addWord()">
+            Добавить слово
+        </button>
+    </div>
+
+    <div class="words-section">
+        <h2>📚 Список слов</h2>
+        <div class="words-list" id="wordsList"></div>
+        <div class="actions-buttons">
+            <button class="copy-all-btn" onclick="copyAllWords()">
+                📋 Копировать
+            </button>
+            <button class="clear-all-btn" onclick="clearAllWords()">
+                🗑️ Очистить список
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>✏️ Редактировать слово</h3>
+            <div id="editColumnsContainer"></div>
+            <div class="modal-buttons">
+                <button class="save-btn" onclick="saveEdit()">Сохранить</button>
+                <button class="cancel-btn" onclick="closeEditModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let currentEditIndex = null;
+
+        // Добавить колонку
+        function addColumn(lang) {
+            const container = document.getElementById(lang === 'ru' ? 'russianColumns' : 'arabicColumns');
+            const newRow = document.createElement('div');
+            newRow.className = 'input-row' + (lang === 'ar' ? ' arabic' : '');
+            
+            newRow.innerHTML = `
+                <input type="text" placeholder="${lang === 'ru' ? 'Русский' : 'عربي'}" data-lang="${lang}">
+                <button class="remove-column-btn" onclick="removeColumn(this)">✕</button>
+            `;
+            
+            container.appendChild(newRow);
+            checkForm();
+        }
+
+        // Удалить колонку
+        function removeColumn(btn) {
+            const row = btn.parentElement;
+            const container = row.parentElement;
+            
+            // Не даем удалить последнюю колонку
+            if (container.children.length > 1) {
+                row.remove();
+                checkForm();
+            }
+        }
+
+        // Получить все значения из колонок
+        function getColumnValues(lang) {
+            const container = document.getElementById(lang === 'ru' ? 'russianColumns' : 'arabicColumns');
+            const inputs = container.querySelectorAll('input');
+            return Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(value => value !== '');
+        }
+
+        // Проверка формы
+        function checkForm() {
+            const ruValues = getColumnValues('ru');
+            const arValues = getColumnValues('ar');
+            const btn = document.getElementById('addWordBtn');
+            
+            // Минимум одно русское и одно арабское слово
+            btn.disabled = ruValues.length === 0 || arValues.length === 0;
+        }
+
+        // Слушатели на все инпуты
+        document.addEventListener('input', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                checkForm();
+            }
+        });
+
+        // Добавить слово
+        function addWord() {
+            const ruValues = getColumnValues('ru');
+            const arValues = getColumnValues('ar');
+
+            if (ruValues.length === 0 || arValues.length === 0) return;
+
+            // Формируем строку: "русский, русский - арабский - арабский"
+            const ruPart = ruValues.join(', ');
+            const arPart = arValues.join(' - ');
+            const wordText = `${ruPart} - ${arPart}`;
+
+            // Сохраняем
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            words.push(wordText);
+            localStorage.setItem('words', JSON.stringify(words));
+
+            // Очищаем форму
+            clearForm();
+            
+            // Обновляем список
+            renderWords();
+            
+            // Уведомление
+            showNotification('✓ Слово добавлено');
+        }
+
+        // Очистить форму
+        function clearForm() {
+            // Оставляем только первые инпуты
+            const ruContainer = document.getElementById('russianColumns');
+            const arContainer = document.getElementById('arabicColumns');
+            
+            while (ruContainer.children.length > 1) {
+                ruContainer.removeChild(ruContainer.lastChild);
+            }
+            while (arContainer.children.length > 1) {
+                arContainer.removeChild(arContainer.lastChild);
+            }
+            
+            // Очищаем значения
+            document.querySelectorAll('input').forEach(input => input.value = '');
+            checkForm();
+        }
+
+        // Отрисовать список слов
+        function renderWords() {
+            const wordsList = document.getElementById('wordsList');
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            
+            document.getElementById('totalCount').textContent = words.length;
+
+            if (words.length === 0) {
+                wordsList.innerHTML = '<div class="empty-state">Пока нет слов</div>';
+                return;
+            }
+
+            wordsList.innerHTML = words.map((word, index) => `
+                <div class="word-item">
+                    <div class="word-text" onclick="editWord(${index})">${word}</div>
+                    <div class="word-actions">
+                        <button class="edit-btn" onclick="editWord(${index})">✏️</button>
+                        <button class="delete-btn" onclick="deleteWord(${index})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Удалить слово
+        function deleteWord(index) {
+            if (!confirm('Удалить это слово?')) return;
+            
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            words.splice(index, 1);
+            localStorage.setItem('words', JSON.stringify(words));
+            renderWords();
+            showNotification('🗑️ Слово удалено');
+        }
+
+        // Редактировать слово
+        function editWord(index) {
+            currentEditIndex = index;
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            const word = words[index];
+            
+            // Парсим слово обратно
+            const parts = word.split(' - ');
+            const ruParts = parts[0].split(', ');
+            const arParts = parts.slice(1);
+            
+            // Создаем поля для редактирования
+            const container = document.getElementById('editColumnsContainer');
+            container.innerHTML = '';
+            
+            // Русские колонки
+            const ruGroup = document.createElement('div');
+            ruGroup.style.marginBottom = '15px';
+            ruGroup.innerHTML = '<strong>Русский:</strong>';
+            ruParts.forEach((val, i) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = val;
+                input.style.width = '100%';
+                input.style.padding = '10px';
+                input.style.marginTop = '8px';
+                input.style.border = '2px solid #e0e0e0';
+                input.style.borderRadius = '8px';
+                input.style.fontSize = '16px';
+                input.dataset.lang = 'ru';
+                ruGroup.appendChild(input);
+            });
+            container.appendChild(ruGroup);
+            
+            // Арабские колонки
+            const arGroup = document.createElement('div');
+            arGroup.innerHTML = '<strong>Арабский:</strong>';
+            arParts.forEach((val, i) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = val;
+                input.style.width = '100%';
+                input.style.padding = '10px';
+                input.style.marginTop = '8px';
+                input.style.border = '2px solid #e0e0e0';
+                input.style.borderRadius = '8px';
+                input.style.fontSize = '16px';
+                input.style.direction = 'rtl';
+                input.style.textAlign = 'right';
+                input.dataset.lang = 'ar';
+                arGroup.appendChild(input);
+            });
+            container.appendChild(arGroup);
+            
+            // Показываем модальное окно
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        // Сохранить редактирование
+        function saveEdit() {
+            const container = document.getElementById('editColumnsContainer');
+            const ruInputs = Array.from(container.querySelectorAll('input[data-lang="ru"]'));
+            const arInputs = Array.from(container.querySelectorAll('input[data-lang="ar"]'));
+            
+            const ruValues = ruInputs.map(i => i.value.trim()).filter(v => v !== '');
+            const arValues = arInputs.map(i => i.value.trim()).filter(v => v !== '');
+            
+            if (ruValues.length === 0 || arValues.length === 0) {
+                alert('Заполните хотя бы одно русское и одно арабское поле');
+                return;
+            }
+            
+            const ruPart = ruValues.join(', ');
+            const arPart = arValues.join(' - ');
+            const wordText = `${ruPart} - ${arPart}`;
+            
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            words[currentEditIndex] = wordText;
+            localStorage.setItem('words', JSON.stringify(words));
+            
+            closeEditModal();
+            renderWords();
+            showNotification('✓ Слово обновлено');
+        }
+
+        // Закрыть модальное окно
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            currentEditIndex = null;
+        }
+
+        // Копировать все слова
+        function copyAllWords() {
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            
+            if (words.length === 0) {
+                showNotification('⚠️ Нет слов для копирования');
+                return;
+            }
+            
+            const text = words.join('\n');
+            
+            // Копируем в буфер обмена
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('📋 Скопировано в буфер обмена');
+                });
+            } else {
+                // Fallback для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('📋 Скопировано в буфер обмена');
+            }
+        }
+
+        // Очистить все слова
+        function clearAllWords() {
+            const words = JSON.parse(localStorage.getItem('words') || '[]');
+            
+            if (words.length === 0) {
+                showNotification('⚠️ Список уже пуст');
+                return;
+            }
+            
+            if (!confirm(`Удалить все слова (${words.length} шт.)? Это действие нельзя отменить.`)) {
+                return;
+            }
+            
+            localStorage.removeItem('words');
+            renderWords();
+            showNotification('🗑️ Список очищен');
+        }
+
+        // Показать уведомление
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // Закрытие модального окна по клику вне его
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                closeEditModal();
+            }
+        });
+
+        // Инициализация
+        renderWords();
+        checkForm();
+    </script>
+</body>
+</html>
