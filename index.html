@@ -246,9 +246,10 @@
         }
 
         .words-list {
-            max-height: 400px;
+            height: 400px;
             overflow-y: auto;
             margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .word-item {
@@ -539,7 +540,14 @@
                 <span class="column-label">🇷🇺 Русский:</span>
                 <div class="column-group" id="russianColumns">
                     <div class="input-row">
-                        <input type="text" placeholder="Введите слово" data-lang="ru">
+                        <input 
+                            type="text" 
+                            placeholder="Введите слово" 
+                            data-lang="ru"
+                            inputmode="text"
+                            autocapitalize="sentences"
+                            autocorrect="on"
+                            spellcheck="true">
                         <button class="add-column-btn" data-lang="ru">+</button>
                     </div>
                 </div>
@@ -551,7 +559,14 @@
                 <span class="column-label">🇸🇦 العربية:</span>
                 <div class="column-group" id="arabicColumns">
                     <div class="input-row arabic">
-                        <input type="text" placeholder="اكتب الكلمة" data-lang="ar">
+                        <input 
+                            type="text" 
+                            placeholder="اكتب الكلمة" 
+                            data-lang="ar"
+                            inputmode="text"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false">
                         <button class="add-column-btn" data-lang="ar">+</button>
                     </div>
                 </div>
@@ -599,25 +614,40 @@
             const newRow = document.createElement('div');
             newRow.className = 'input-row' + (lang === 'ar' ? ' arabic' : '');
             
-            newRow.innerHTML = `
-                <input type="text" placeholder="${lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة'}" data-lang="${lang}">
-                <button class="remove-column-btn">✕</button>
-            `;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة';
+            input.dataset.lang = lang;
+            input.setAttribute('inputmode', 'text');
             
+            if (lang === 'ar') {
+                input.setAttribute('autocapitalize', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('spellcheck', 'false');
+            } else {
+                input.setAttribute('autocapitalize', 'sentences');
+                input.setAttribute('autocorrect', 'on');
+                input.setAttribute('spellcheck', 'true');
+            }
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-column-btn';
+            removeBtn.textContent = '✕';
+            
+            newRow.appendChild(input);
+            newRow.appendChild(removeBtn);
             container.appendChild(newRow);
             
-            // Устанавливаем обработчик для новой кнопки удаления
-            const removeBtn = newRow.querySelector('.remove-column-btn');
+            // Устанавливаем обработчик для кнопки удаления
             setupButtonHandler(removeBtn, () => removeColumn(removeBtn));
             
             // Фокус на новом поле
-            const newInput = newRow.querySelector('input');
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    newInput.focus();
+                    input.focus();
                     // Курсор в конец на iOS
-                    if (newInput.setSelectionRange) {
-                        newInput.setSelectionRange(newInput.value.length, newInput.value.length);
+                    if (input.setSelectionRange) {
+                        input.setSelectionRange(input.value.length, input.value.length);
                     }
                 });
             });
@@ -791,6 +821,10 @@
                 input.type = 'text';
                 input.value = val;
                 input.dataset.lang = 'ru';
+                input.setAttribute('inputmode', 'text');
+                input.setAttribute('autocapitalize', 'sentences');
+                input.setAttribute('autocorrect', 'on');
+                input.setAttribute('spellcheck', 'true');
                 row.appendChild(input);
                 ruGroup.appendChild(row);
             });
@@ -828,6 +862,10 @@
                 input.style.fontFamily = "'Traditional Arabic', 'Arabic Typesetting', Arial";
                 input.style.fontSize = '20px';
                 input.dataset.lang = 'ar';
+                input.setAttribute('inputmode', 'text');
+                input.setAttribute('autocapitalize', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('spellcheck', 'false');
                 row.appendChild(input);
                 arGroup.appendChild(row);
             });
@@ -860,12 +898,20 @@
             input.type = 'text';
             input.placeholder = lang === 'ru' ? 'Введите слово' : 'اكتب الكلمة';
             input.dataset.lang = lang;
+            input.setAttribute('inputmode', 'text');
             
             if (lang === 'ar') {
                 input.style.direction = 'rtl';
                 input.style.textAlign = 'right';
                 input.style.fontFamily = "'Traditional Arabic', 'Arabic Typesetting', Arial";
                 input.style.fontSize = '20px';
+                input.setAttribute('autocapitalize', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('spellcheck', 'false');
+            } else {
+                input.setAttribute('autocapitalize', 'sentences');
+                input.setAttribute('autocorrect', 'on');
+                input.setAttribute('spellcheck', 'true');
             }
             
             row.appendChild(input);
