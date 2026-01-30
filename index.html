@@ -30,10 +30,40 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
         .header h1 {
             font-size: 24px;
-            margin-bottom: 8px;
             color: #333;
+            margin: 0;
+        }
+
+        .swap-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .swap-btn:active {
+            background: #0b7dda;
+        }
+
+        .swap-btn:focus {
+            outline: none;
         }
 
         .stats {
@@ -59,6 +89,23 @@
 
         .column-section {
             width: 100%;
+        }
+
+        .column-section.russian {
+            order: 1;
+        }
+
+        .column-section.arabic {
+            order: 2;
+        }
+
+        /* Режим реверса */
+        .columns-container.reversed .column-section.russian {
+            order: 2;
+        }
+
+        .columns-container.reversed .column-section.arabic {
+            order: 1;
         }
 
         .column-label {
@@ -478,15 +525,20 @@
 </head>
 <body>
     <div class="header">
-        <h1>📝 Запись слов</h1>
+        <div class="header-top">
+            <h1>📝 Записать слова</h1>
+            <button class="swap-btn" id="swapBtn" title="Поменять порядок колонок">
+                🔄
+            </button>
+        </div>
         <div class="stats">
             Всего слов: <span id="totalCount">0</span>
         </div>
     </div>
 
     <div class="input-section">
-        <div class="columns-container">
-            <div class="column-section">
+        <div class="columns-container" id="columnsContainer">
+            <div class="column-section russian">
                 <span class="column-label">🇷🇺 Русский:</span>
                 <div class="column-group" id="russianColumns">
                     <div class="input-row">
@@ -498,7 +550,7 @@
 
             <div class="separator">─────</div>
 
-            <div class="column-section">
+            <div class="column-section arabic">
                 <span class="column-label">🇸🇦 العربية:</span>
                 <div class="column-group" id="arabicColumns">
                     <div class="input-row arabic">
@@ -958,10 +1010,45 @@
             });
         }
 
+        // Переключение порядка колонок
+        function toggleColumnsOrder() {
+            const container = document.getElementById('columnsContainer');
+            const isReversed = container.classList.toggle('reversed');
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('columnsReversed', isReversed ? 'true' : 'false');
+            
+            // Анимация кнопки
+            const btn = document.getElementById('swapBtn');
+            btn.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                btn.style.transform = 'rotate(0deg)';
+            }, 300);
+        }
+
+        // Загрузка порядка колонок из localStorage
+        function loadColumnsOrder() {
+            const isReversed = localStorage.getItem('columnsReversed') === 'true';
+            if (isReversed) {
+                document.getElementById('columnsContainer').classList.add('reversed');
+            }
+        }
+
+        // Инициализация обработчика кнопки переключения
+        function initSwapButton() {
+            const swapBtn = document.getElementById('swapBtn');
+            setupButtonHandler(swapBtn, toggleColumnsOrder);
+            
+            // Добавляем плавную анимацию
+            swapBtn.style.transition = 'transform 0.3s ease';
+        }
+
         // Инициализация
+        loadColumnsOrder();
         renderWords();
         checkForm();
         initButtonHandlers();
+        initSwapButton();
     </script>
 </body>
 </html>
